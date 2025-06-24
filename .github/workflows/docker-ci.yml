@@ -21,13 +21,15 @@ jobs:
         run: docker compose run --rm test
         continue-on-error: true
 
-      - name: Get short Git SHA
+      - name: Get short Git SHA and tag/branch name
         id: vars
         run: |
           echo "timestamp=$(date +'%Y%m%d%H%M')" >> $GITHUB_OUTPUT
-          echo "branch=$(echo ${GITHUB_REF#refs/heads/} | tr '/' '-')" >> $GITHUB_OUTPUT
+          ref=${GITHUB_REF#refs/heads/}
+          ref=${ref#refs/tags/}
+          ref=$(echo $ref | tr '/' '-')
+          echo "branch=$ref" >> $GITHUB_OUTPUT
 
-        
       - name:  Log in to Docker Hub
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
