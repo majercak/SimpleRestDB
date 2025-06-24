@@ -1,6 +1,6 @@
 def test_create_user_success(client):
     response = client.post("/api/v1/users/", json={"name": "John", "email": "test32@test.com"})
-    assert response.status_code == 200
+    assert response.status_code == 201
 
 
 def test_create_user_missing_email(client):
@@ -25,12 +25,12 @@ def test_create_user_empty_payload(client):
 
 def test_create_user_extra_fields_ignored(client):
     response = client.post("/api/v1/users/", json={"name": "Alice", "email": "alice@test.com", "unexpected": "field"})
-    assert response.status_code == 200
+    assert response.status_code == 201
 
 
 def test_create_user_duplicate_email(client):
     payload = {"name": "John", "email": "duplicate@test.com"}
     response1 = client.post("/api/v1/users/", json=payload)
     response2 = client.post("/api/v1/users/", json=payload)
-    assert response1.status_code == 200
-    assert response2.status_code == 400
+    assert response1.status_code == 201
+    assert response2.status_code == 409
