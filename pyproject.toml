@@ -17,6 +17,11 @@ Source = "https://github.com/majercak/SimpleRestDB"
 dynamic = ["dependencies"]
 
 [tool.hatch.envs.default]
+dependencies = [
+  "pytest",
+  "ruff"
+]
+
 installer = "uv"
 
 [tool.hatch.envs.default.env-vars]
@@ -35,12 +40,10 @@ dependencies = [
     "ruff>=0.12.0"
 ]
 
-[tool.hatch.envs.lint.scripts]
-version = "ruff version"
-check   = "ruff check"
-format  = "ruff check --fix"
-fix     = "ruff check --fix"
-format-unsafe = "ruff check --fix --unsafe-fixes"
+[tool.hatch.envs.default.scripts]
+dev = "uvicorn app.main:app --reload --host 0.0.0.0 --port 8000"
+lint = "ruff check"
+format = "ruff format"
 
 [tool.ruff]
 target-version = "py39"

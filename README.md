@@ -25,35 +25,24 @@ You need:
 
 ```bash
 pip install hatch uv hatch-requirements-txt 
-
-
-## 🐣 Getting Started
-
-### Enter the Hatch shell
-
-```bash
-hatch shell
 ```
 
-This activates the project environment and drops you into an interactive shell with dependencies available. Use it to run tools manually:
 
-```bash
-ruff check app/
-pytest
-```
+### 🔁 Local Hatch Commands
 
----
+| Command       | Description |
+|---------------|-------------|
+| `make dev`    | Runs the development server using Hatch (`hatch run dev`). Useful during active development. |
+| `make lint`   | Runs code linting with Ruff via Hatch (`hatch run lint`). Ensures code quality and formatting standards. |
+| `make format` | Formats code automatically using Ruff (`hatch run format`). Applies safe auto-fixes. |
+| `make shell`  | Opens a Hatch-managed virtual environment shell. Lets you run tools manually with dependencies loaded. |
 
-## 🛠 Common Commands
+### 🐳 Docker Commands
 
-All commands below can be run from **outside the shell** using `hatch run`, or from **within `hatch shell`** directly.
-
-| Task               | Command                                       | Notes                                |
-|--------------------|-----------------------------------------------|---------------------------------------|
-| Ruff check (lint)  | `hatch run ruff check`                        | Check code formatting                 |
-| Ruff fix (safe)    | `hatch run ruff check --fix`                  | Apply safe automatic fixes            |
-| Ruff fix (unsafe)  | `hatch run ruff check --fix --unsafe-fixes`   | Apply all fixes (including unsafe)    |
-| Show Ruff version  | `hatch run ruff --version`                    | Verify Ruff installation              |
-| Run tests          | `hatch run test`                              | Run your test suite (e.g. `pytest`)   |
-
----
+| Command         | Description |
+|------------------|-------------|
+| `make build`     | Builds Docker containers using `docker-compose build`. |
+| `make up`        | Starts up the application stack in the background (`docker-compose up`). |
+| `make down`      | Shuts down all running Docker containers (`docker-compose down`). |
+| `make logs`      | Tails the logs from all containers (`docker-compose logs -f`). |
+| `make test`      | Runs the test suite inside a clean Docker container (`docker-compose run --rm test`). |
