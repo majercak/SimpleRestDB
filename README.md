@@ -38,7 +38,7 @@ hatch shell
 This activates the project environment and drops you into an interactive shell with dependencies available. Use it to run tools manually:
 
 ```bash
-ruff check src/
+ruff check app/
 pytest
 ```
 

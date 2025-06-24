@@ -16,9 +16,6 @@ Source = "https://github.com/majercak/SimpleRestDB"
 
 dynamic = ["dependencies"]
 
-[tool.hatch.version]
-path = "src/__about__.py"
-
 [tool.hatch.envs.default]
 installer = "uv"
 
