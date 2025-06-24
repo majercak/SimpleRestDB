@@ -1,0 +1,50 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "SimpleRestDB"
+version = "0.1.0"
+description = "A simple RESTful API in Python with input validation, persistence, and testing"
+authors = [{ name = "Maciej Majerczyk", email = "mac.majerczyk@gmail.com" }]
+readme = "README.md"
+requires-python = ">=3.9"
+
+[project.urls]
+Documentation = "https://github.com/majercak/SimpleRestDB/blob/main/README.md"
+Source = "https://github.com/majercak/SimpleRestDB"
+
+dynamic = ["dependencies"]
+
+[tool.hatch.version]
+path = "src/__about__.py"
+
+[tool.hatch.envs.default]
+installer = "uv"
+
+[tool.hatch.envs.default.env-vars]
+UV_FIND_LINKS = ""
+UV_INDEX_STRATEGY = "unsafe-best-match"
+
+[tool.hatch.metadata.hooks.requirements_txt]
+files = ["requirements/requirements.txt"]
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.envs.lint]
+detached = true
+dependencies = [
+    "ruff>=0.12.0"
+]
+
+[tool.hatch.envs.lint.scripts]
+version = "ruff version"
+check   = "ruff check"
+format  = "ruff check --fix"
+fix     = "ruff check --fix"
+format-unsafe = "ruff check --fix --unsafe-fixes"
+
+[tool.ruff]
+target-version = "py39"
+line-length = 120
