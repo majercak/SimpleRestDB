@@ -60,8 +60,10 @@ jobs:
           docker push ${{ env.image_tag }}
           docker push ${{ secrets.DOCKER_USERNAME }}/simple-rest-db:latest
 
-      - name: Append Docker image tag to release notes
+      - name: Update GitHub Release Notes (if release branch)
+        if: steps.vars.outputs.is_release_branch == 'true'
         env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           image_tag: ${{ secrets.DOCKER_USERNAME }}/simple-rest-db:${{ steps.vars.outputs.branch }}-${{ steps.vars.outputs.timestamp }}
         run: |
           # Get existing release notes
