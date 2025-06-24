@@ -22,4 +22,4 @@ CMD ["pytest", "tests/"]
 # === Production Stage ===
 FROM base AS prod
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "app.handler:app", "--host", "0.0.0.0", "--port", "8000"]

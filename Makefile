@@ -20,7 +20,7 @@ build:
 	docker-compose build
 
 test:
-	docker-compose run --rm test
+	docker-compose build test && docker-compose run --rm test
 
 up:
 	docker-compose up
