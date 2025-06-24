@@ -64,6 +64,13 @@ jobs:
         if: steps.vars.outputs.is_release_branch == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          image_tag: ${{ secrets.DOCKER_USERNAME }}/simple-rest-db:${{ steps.vars.outputs.branch }}-${{ steps.vars.outputs.timestamp }}
         run: |
-          gh release edit "${{ steps.vars.outputs.branch }}" \
-            --notes "Docker Image: docker.io/${{ env.image_tag }}"
+          # Get existing release notes
+          existing_notes=$(gh release view "${{ steps.vars.outputs.branch }}" --json body -q .body)
+      
+          # Append Docker image info
+          new_notes="${existing_notes}"$'\n\n'"Docker Image: docker.io/${{ env.image_tag }}"
+      
+          # Update release with combined notes
+          gh release edit "${{ steps.vars.outputs.branch }}" --notes "$new_notes"
