@@ -14,32 +14,50 @@ jobs:
         run: docker compose version
 
       - name: Lint with Ruff
-        run: docker compose run --rm test hatch run lint
+        run: docker compose run --rm test ruff check
         continue-on-error: true
 
       - name: Run tests
         run: docker compose run --rm test
         continue-on-error: true
 
-      - name: Get short Git SHA and tag/branch name
+      - name: Get Git info
         id: vars
         run: |
-          echo "timestamp=$(date +'%Y%m%d%H%M')" >> $GITHUB_OUTPUT
-          ref=${GITHUB_REF#refs/heads/}
-          ref=${ref#refs/tags/}
-          ref=$(echo $ref | tr '/' '-')
-          echo "branch=$ref" >> $GITHUB_OUTPUT
+          timestamp=$(date +'%Y%m%d%H%M')
+          ref_name="${GITHUB_REF#refs/heads/}"
+          ref_name="${ref_name#refs/tags/}"
+          ref_name="${GITHUB_REF#refs/}"  # handles both heads/* and tags/*
+          clean_branch=$(echo "$ref_name" | tr '/' '-')
+          echo "timestamp=$timestamp" >> $GITHUB_OUTPUT
+          echo "branch=$clean_branch" >> $GITHUB_OUTPUT
+      
+          # Check if it's a number-prefixed branch
+          if [[ "${GITHUB_REF}" == refs/heads/* && "$clean_branch" =~ ^[0-9] ]]; then
+            echo "is_release_branch=true" >> $GITHUB_OUTPUT
+          else
+            echo "is_release_branch=false" >> $GITHUB_OUTPUT
+          fi
+
 
       - name:  Log in to Docker Hub
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
-      - name: Build Docker image with tags
+      - name: Build Docker image
         run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/simple-rest-db:latest \
-                       -t ${{ secrets.DOCKER_USERNAME }}/simple-rest-db:${{ steps.vars.outputs.branch }}-${{ steps.vars.outputs.timestamp }} \
-                       .
+          IMAGE="${{ secrets.DOCKER_USERNAME }}/simple-rest-db:${{ steps.vars.outputs.branch }}-${{ steps.vars.outputs.timestamp }}"
+          docker build -t $IMAGE -t ${{ secrets.DOCKER_USERNAME }}/simple-rest-db:latest .
+          echo "image_tag=$IMAGE" >> $GITHUB_ENV
 
-      - name: Push Docker images
+      - name: Push Docker image
         run: |
+          docker push ${{ env.image_tag }}
           docker push ${{ secrets.DOCKER_USERNAME }}/simple-rest-db:latest
-          docker push ${{ secrets.DOCKER_USERNAME }}/simple-rest-db:${{ steps.vars.outputs.branch }}-${{ steps.vars.outputs.timestamp }}
+
+      - name: Update GitHub Release Notes (if release branch)
+        if: steps.vars.outputs.is_release_branch == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release edit "${{ steps.vars.outputs.branch }}" \
+            --notes "Docker Image: docker.io/${{ env.image_tag }}"
