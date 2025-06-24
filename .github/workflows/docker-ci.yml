@@ -25,15 +25,21 @@ jobs:
         id: vars
         run: |
           timestamp=$(date +'%Y%m%d%H%M')
-          ref_name="${GITHUB_REF#refs/heads/}"
-          ref_name="${ref_name#refs/tags/}"
-          ref_name="${GITHUB_REF#refs/}"  # handles both heads/* and tags/*
+      
+          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            ref_name="${GITHUB_REF#refs/tags/}"
+          elif [[ "$GITHUB_REF" == refs/heads/* ]]; then
+            ref_name="${GITHUB_REF#refs/heads/}"
+          else
+            ref_name="${GITHUB_REF#refs/}"
+          fi
+      
           clean_branch=$(echo "$ref_name" | tr '/' '-')
+          
           echo "timestamp=$timestamp" >> $GITHUB_OUTPUT
           echo "branch=$clean_branch" >> $GITHUB_OUTPUT
       
-          # Check if it's a number-prefixed branch
-          if [[ "${GITHUB_REF}" == refs/heads/* && "$clean_branch" =~ ^[0-9] ]]; then
+          if [[ "$clean_branch" =~ ^[0-9] ]]; then
             echo "is_release_branch=true" >> $GITHUB_OUTPUT
           else
             echo "is_release_branch=false" >> $GITHUB_OUTPUT
