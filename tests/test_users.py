@@ -1,15 +1,36 @@
-import pytest
-from app import models
+def test_create_user_success(client):
+    response = client.post("/api/v1/users/", json={"name": "John", "email": "test32@test.com"})
+    assert response.status_code == 200
 
-TEST_USER = {"name": "Test User", "email": "test@example.com", "phone_number": "123-456-7890"}
+
+def test_create_user_missing_email(client):
+    response = client.post("/api/v1/users/", json={"name": "Test"})
+    assert response.status_code == 422
 
 
-@pytest.mark.asyncio
-async def test_create_and_read_user(db_session):
-    new_user = models.User(**TEST_USER)
-    db_session.add(new_user)
-    await db_session.commit()
+def test_create_user_missing_name(client):
+    response = client.post("/api/v1/users/", json={"email": "test33@test.com"})
+    assert response.status_code == 422
 
-    result = await db_session.get(models.User, new_user.id)
-    assert result is not None
-    assert result.email == TEST_USER["email"]
+
+def test_create_user_invalid_email_format(client):
+    response = client.post("/api/v1/users/", json={"name": "John", "email": "not-an-email"})
+    assert response.status_code == 422
+
+
+def test_create_user_empty_payload(client):
+    response = client.post("/api/v1/users/", json={})
+    assert response.status_code == 422
+
+
+def test_create_user_extra_fields_ignored(client):
+    response = client.post("/api/v1/users/", json={"name": "Alice", "email": "alice@test.com", "unexpected": "field"})
+    assert response.status_code == 200
+
+
+def test_create_user_duplicate_email(client):
+    payload = {"name": "John", "email": "duplicate@test.com"}
+    response1 = client.post("/api/v1/users/", json=payload)
+    response2 = client.post("/api/v1/users/", json=payload)
+    assert response1.status_code == 200
+    assert response2.status_code == 400

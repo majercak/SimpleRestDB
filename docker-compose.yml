@@ -21,7 +21,7 @@ services:
     build:
       context: .
       target: prod
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    command: uvicorn app.handler:app --host 0.0.0.0 --port 8000 --reload
     volumes:
       - .:/app
     ports:
@@ -30,7 +30,7 @@ services:
       db:
         condition: service_healthy
     environment:
-      DATABASE_URL: "postgresql+asyncpg://myuser:mypassword@db:5432/mydb"
+      DATABASE_URL: "postgresql://myuser:mypassword@db:5432/mydb"
 
   test:
     build:
@@ -43,7 +43,7 @@ services:
       db:
         condition: service_healthy
     environment:
-      DATABASE_URL: postgresql+asyncpg://myuser:mypassword@db:5432/mydb
+      DATABASE_URL: postgresql://myuser:mypassword@db:5432/mydb
     profiles:
       - test
 volumes:
