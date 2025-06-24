@@ -1,4 +1,3 @@
-from fastapi import FastAPI
 from . import models
 from .database import engine, get_db
 from .schemas import UserRequest, UserResponse

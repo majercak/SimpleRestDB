@@ -1,19 +1,43 @@
-name: CI - Docker Build and Test
+name: CI - Lint, Test, and Push
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
 
 jobs:
-  docker-test:
+  lint-test-build-push:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Set up Docker Compose
         run: docker compose version
 
-      - name: Build Docker images
-        run: docker compose build
+      - name: Lint with Ruff (via Hatch)
+        run: docker compose run --rm web hatch run lint
 
       - name: Run tests
         run: docker compose run --rm test
+
+      - name: Get short Git SHA
+        id: vars
+        run: echo "sha_short=$(git rev-parse --short=8 HEAD)" >> $GITHUB_OUTPUT
+        
+      - name:  Log in to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Build Docker image with tags
+        run: |
+          docker build \
+            -t ${{ secrets.DOCKER_USERNAME }}/simple-rest-db:latest \
+            -t ${{ secrets.DOCKER_USERNAME }}/simple-rest-db:${{ steps.vars.outputs.sha_short }} \
+            .
+
+      - name: Push Docker images
+        run: |
+          docker push ${{ secrets.DOCKER_USERNAME }}/simple-rest-db:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/simple-rest-db:${{ steps.vars.outputs.sha_short }}
